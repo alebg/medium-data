@@ -3,6 +3,7 @@ Converts CSV files to Parquet format, using pyarrow.
 """
 
 from typing import Tuple
+import pyarrow as pa
 import pyarrow.csv as pv
 import pyarrow.parquet as pq
 from medium_data.utils.infer_encoding import infer_encoding
@@ -18,22 +19,33 @@ def convert_csv_to_parquet(csv_file: str, parquet_file: str, encoding: str) -> T
         csv_file (str): Path to the input CSV file.
         parquet_file (str): Path to the output Parquet file.
     """
+
+    logger = get_logger(THIS_FILE_NAME)
+
+    writer = None
+
     try:
-        read_opts = pv.ReadOptions(
-            encoding=encoding,  # Use the inferred encoding
-        )
+        read_opts = pv.ReadOptions(encoding=encoding, block_size=64 * 1024 * 1024)
+        batch_count = 0
 
-        # Read the CSV file
-        table = pv.read_csv(csv_file, read_options=read_opts)
-        
-        # Write the table to a Parquet file
-        pq.write_table(table, parquet_file, )
+        with pv.open_csv(csv_file, read_options=read_opts) as reader:
+            for batch in reader:
+                if writer is None:
+                    writer = pq.ParquetWriter(parquet_file, batch.schema)
+                writer.write_table(pa.Table.from_batches([batch]))
+                batch_count += 1
+                if batch_count % 100 == 0:
+                    logger.info(f"Processed {batch_count} batches...")
 
-        return (True, "")
-    
     except Exception as e:
-
         return (False, f"Error converting '{csv_file}' to Parquet: {e}")
+
+    finally:
+        if writer:
+            writer.close()
+
+    logger.info(f"Conversion complete. Total batches: {batch_count}")
+    return (True, "")
 
 
 def main(

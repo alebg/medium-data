@@ -6,7 +6,7 @@ authors = [
     {name = "Alejandra Montoya García Cobian"},
     {name = "Luis Alejandro Bordo García"}
     ]
-
+license = {text = "MIT License"}
 dependencies = [
     "chardet==5.2.0",
     "pyarrow==20.0.0",

@@ -1,0 +1,24 @@
+[project]
+name = "medium_data"
+version = "0.1.0"
+description = "Utilities for processing and analyzing medium-sized datasets."
+authors = [
+    {name = "Alejandra Montoya García Cobian"},
+    {name = "Luis Alejandro Bordo García"}
+    ]
+
+dependencies = [
+    "chardet==5.2.0",
+    "pyarrow==20.0.0",
+    "polars==1.30.0",
+    "jupyter==1.1.1",
+]
+
+[build-system]
+requires = [
+    "setuptools>=80.9.0 ",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["medium_data"]
